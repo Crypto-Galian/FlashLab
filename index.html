@@ -1,1 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlashLab — Demo Liquidity Platform</title>
+<meta name="description" content="FlashLab demo liquidity and transaction simulation platform.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+<style>
+:root{
+  --bg:#070908;--surface:#0b100d;--surface2:#101711;--line:#202b23;
+  --text:#eef4ef;--muted:#7f8c84;--muted2:#9aa69f;--green:#72e19c;
+  --green-dark:#102016;--yellow:#e7c95b;--shadow:0 25px 80px rgba(0,0,0,.48)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+ radial-gradient(circle at 75% -10%,rgba(114,225,156,.12),transparent 32%),
+ radial-gradient(circle at 5% 35%,rgba(114,225,156,.045),transparent 28%),var(--bg);
+ color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.container{width:min(1180px,calc(100% - 48px));margin:auto}
+
+header{
+ position:sticky;top:0;z-index:100;background:rgba(7,9,8,.84);
+ backdrop-filter:blur(18px);border-bottom:1px solid #1c241f
+}
+.nav{height:76px;display:flex;align-items:center;justify-content:space-between}
+
+.flash-logo{display:inline-grid;place-items:center;width:36px;height:36px;margin-right:9px;
+  border:1px solid #315b43;border-radius:11px;color:var(--green);
+  background:linear-gradient(145deg,#102016,#0b130e);
+  box-shadow:0 0 24px rgba(114,225,156,.13)}
+.flash-logo svg{width:27px;height:27px}
+.brand{font-weight:850;font-size:21px;letter-spacing:-.7px;display:flex;align-items:center}
+.brand .logo{display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid #315b43;border-radius:9px;margin-right:9px;color:var(--green);font-size:11px}
+.brand span:last-child{color:var(--green)}
+.nav-links{display:flex;gap:28px;color:#98a49d;font-size:13px;font-weight:650}
+.nav-links a:hover{color:#fff}
+.nav-btn,.primary{background:var(--green);color:#07100a;padding:12px 18px;border-radius:10px;font-weight:800;font-size:13px}
+.nav-btn:hover,.primary:hover{filter:brightness(1.05)}
+
+.hero{padding:100px 0 88px}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:72px;align-items:center}
+.pill,.eyebrow{color:var(--green);font-size:10px;font-weight:850;letter-spacing:1.8px}
+.pill{display:inline-block;padding:8px 11px;border:1px solid #294635;border-radius:999px;background:#0b130e}
+.hero h1{font-size:clamp(50px,7vw,82px);line-height:.98;letter-spacing:-4px;margin:22px 0}
+.hero h1 em{font-style:normal;color:var(--green)}
+.hero p{max-width:620px;color:#99a59e;font-size:16px}
+.hero-actions{display:flex;gap:12px;margin:30px 0;flex-wrap:wrap}
+.secondary{border:1px solid #2b352f;border-radius:10px;padding:12px 18px;color:#c2cbc5;font-weight:700;font-size:13px}
+.secondary:hover{border-color:#415047}
+.stats{display:flex;gap:42px;margin-top:46px}
+.stats div{display:grid}
+.stats b{font-size:21px}
+.stats span{font-size:10px;color:#68746c;text-transform:uppercase;letter-spacing:1px}
+
+.hero-card,.panel{background:linear-gradient(145deg,#101711,#0b100d);border:1px solid #263329;border-radius:22px;box-shadow:var(--shadow)}
+.hero-card{padding:27px;transform:rotate(1deg)}
+.card-top,.preview-head{display:flex;justify-content:space-between;color:#718077;font-size:10px;letter-spacing:1.4px;font-weight:800}
+.live{color:var(--green)}
+.balance{font-size:43px;font-weight:800;margin:65px 0 18px;letter-spacing:-2px}
+.balance small{font-size:11px;color:#748078;letter-spacing:1px}
+.mini-chart{height:85px;display:flex;align-items:end;gap:8px;border-bottom:1px solid #1e2a22}
+.mini-chart i{display:block;flex:1;background:var(--green);border-radius:5px 5px 0 0;opacity:.65}
+.mini-chart i:nth-child(1){height:25%}.mini-chart i:nth-child(2){height:42%}.mini-chart i:nth-child(3){height:33%}
+.mini-chart i:nth-child(4){height:58%}.mini-chart i:nth-child(5){height:45%}.mini-chart i:nth-child(6){height:70%}
+.mini-chart i:nth-child(7){height:60%}.mini-chart i:nth-child(8){height:78%}.mini-chart i:nth-child(9){height:94%}
+.wallet-row{display:flex;justify-content:space-between;margin-top:20px;color:#77837b;font-size:11px}
+.wallet-row b{color:#c8d1cb}
+
+.notice{margin:-20px auto 20px;padding:14px 17px;border:1px solid rgba(231,201,91,.2);background:rgba(231,201,91,.035);border-radius:12px;color:#aeb7b0;font-size:11px;text-align:center}
+.notice strong{color:var(--yellow)}
+
+.section{padding:88px 0}
+.section.alt{background:#0b0f0c;border-block:1px solid #19221c}
+.section-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:28px}
+.section-heading h2,.section h2{font-size:40px;letter-spacing:-1.8px;margin:8px 0 0}
+.section-heading p,.section-intro{color:var(--muted);font-size:13px}
+.demo-note{font-size:9px;color:#8c9891;border:1px solid #303a33;padding:7px 10px;border-radius:7px;letter-spacing:1px}
+
+.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.plan{position:relative;padding:25px 21px;border:1px solid #202b23;border-radius:17px;background:#0a0e0b;transition:.2s}
+.plan:hover{transform:translateY(-4px);border-color:#35533f}
+.plan.popular{border-color:#3b694b;background:linear-gradient(145deg,#101a13,#0a0e0b)}
+.plan-tag{position:absolute;right:13px;top:13px;color:#07100a;background:var(--green);padding:5px 8px;border-radius:6px;font-size:8px;font-weight:900}
+.plan-label{color:#8d9992;font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:850}
+.plan-amount{font-size:28px;font-weight:850;letter-spacing:-1px;margin-top:17px}
+.plan-amount small{font-size:9px;color:var(--green);letter-spacing:.7px}
+.plan-price{margin-top:17px;color:#7e8a82;font-size:10px}.plan-price strong{display:block;color:#e7eee9;font-size:19px;margin-top:2px}
+.plan-divider{height:1px;background:#202a23;margin:19px 0}
+.plan ul{list-style:none;padding:0;margin:0;color:#7f8b84;font-size:10px}
+.plan li{margin:9px 0}
+.plan li:before{content:"✓";color:var(--green);margin-right:7px;font-weight:900}
+.plan a{display:block;text-align:center;margin-top:21px;padding:10px;border-radius:9px;background:#0d1710;border:1px solid #294635;color:var(--green);font-size:10px;font-weight:850}
+
+.sim-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{padding:28px}
+.form-panel label{display:block;font-size:10px;color:#829087;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;margin:18px 0 8px}
+.select-wrap select,.form-panel input{width:100%;background:#070a08;color:#eaf0eb;border:1px solid #2a352e;border-radius:10px;padding:13px;outline:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.input-wrap{display:flex;align-items:center;background:#070a08;border:1px solid #2a352e;border-radius:10px}
+.input-wrap span{padding-left:13px;color:var(--green)}
+.input-wrap input{border:0;background:transparent}
+.generate{width:100%;margin-top:24px;padding:14px;border:0;border-radius:10px;background:var(--green);color:#07100a;font-weight:800;cursor:pointer}
+.generate:hover{filter:brightness(1.05)}
+.disclaimer{font-size:9px;color:#626e66;text-align:center;margin-bottom:0}
+.result-box{margin-top:20px;width:100%;padding:13px;border-radius:9px;background:#0d1710;color:#819087;font-size:11px}
+.preview{display:flex;flex-direction:column;align-items:center;text-align:center}
+.preview-head{width:100%}
+#status{color:var(--green)}
+.token-icon{width:68px;height:68px;display:grid;place-items:center;border-radius:50%;background:#112719;color:var(--green);font-size:34px;font-weight:900;margin:35px 0 14px}
+.preview h3{font-size:42px;margin:0;letter-spacing:-2px}
+.preview>p{font-size:9px;color:#69756d;letter-spacing:1.5px}
+.details{width:100%;margin-top:22px;border-top:1px solid #202a23}
+.details div{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #202a23;font-size:11px}
+.details span{color:#68746c}.details b{max-width:60%;overflow:hidden;text-overflow:ellipsis}
+
+.network-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px}
+.network{padding:20px;border:1px solid #222d25;border-radius:14px;background:#0b100d;color:var(--green)}
+.network b,.network small{display:block;color:#e7eee9;margin-top:7px}
+.network small{color:#657169;font-size:9px;letter-spacing:1px}
+
+.payment{max-width:1000px;margin:auto}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.tab{padding:12px 8px;border:1px solid #263329;background:#0b100d;color:#9aa69f;border-radius:9px;cursor:pointer;font-size:10px;font-weight:800}
+.tab.active{background:#102016;border-color:#3b694b;color:var(--green)}
+.payment-card{display:grid;grid-template-columns:1fr 280px;gap:26px;padding:28px;border:1px solid #263329;border-radius:20px;background:linear-gradient(145deg,#101711,#0b100d);box-shadow:var(--shadow)}
+.network-badge{display:inline-block;padding:6px 9px;border-radius:6px;background:#102016;color:var(--green);font-size:9px;font-weight:900}
+.payment-card h3{font-size:25px;margin:17px 0 6px}.payment-card p{font-size:11px;color:var(--muted);margin:0 0 21px}
+.address{display:flex;gap:7px}.address input{font-size:10px}.address button{border:0;padding:0 16px;border-radius:9px;background:var(--green);color:#07100a;font-weight:900;cursor:pointer}
+.warning{margin-top:14px;padding:11px;border-radius:9px;background:rgba(231,201,91,.035);border:1px solid rgba(231,201,91,.13);font-size:9px;color:#aeb5c0}
+.qr{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;background:#070b08;border:1px solid #202b23;border-radius:15px}
+#qrcode{background:#fff;padding:8px;border-radius:8px;width:190px;height:190px}
+.qr small{color:var(--muted);font-size:9px;margin-top:10px}
+
+.feature-grid,.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:32px}
+.feature,.step{border:1px solid #202b23;border-radius:16px;padding:26px;background:#0a0e0b}
+.feature span,.step b{color:var(--green);font-size:10px;letter-spacing:1px}
+.feature h3,.step h3{font-size:19px}.feature p,.step p{color:#7d8981;font-size:12px}
+
+.faq{max-width:900px;margin:auto}
+.faq details{border-bottom:1px solid #263028;padding:19px 0}
+.faq summary{cursor:pointer;font-weight:700;font-size:13px}
+.faq p{color:#7d8981;font-size:12px;max-width:700px}
+
+footer{border-top:1px solid #1c241f;padding:35px 0;color:#68746c;font-size:11px}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}
+
+@media(max-width:950px){
+ .hero-grid{grid-template-columns:1fr;gap:45px}.hero-card{transform:none}
+ .plans{grid-template-columns:repeat(2,1fr)}.network-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+ .container{width:min(100% - 32px,1180px)}
+ .nav-links{display:none}.nav-btn{padding:10px 13px}
+ .hero{padding:72px 0 60px}.hero h1{letter-spacing:-3px}
+ .stats{gap:20px;justify-content:space-between}
+ .sim-grid,.payment-card{grid-template-columns:1fr}.qr{order:-1}
+ .grid2{grid-template-columns:1fr}.tabs{grid-template-columns:repeat(2,1fr)}
+ .address{flex-direction:column}.address button{padding:12px}
+ .feature-grid,.steps{grid-template-columns:1fr}
+ .section{padding:68px 0}.section-heading{align-items:flex-start;gap:15px}
+ .section-heading h2,.section h2{font-size:32px}
+ .footer-inner{flex-direction:column;text-align:center}
+}
+@media(max-width:520px){
+ .hero h1{font-size:51px}.hero-actions{flex-direction:column}.hero-actions a{text-align:center}
+ .plans,.network-grid{grid-template-columns:1fr}
+ .stats span{font-size:8px}
+ .balance{font-size:35px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <a class="brand" href="#home"><span class="flash-logo" aria-label="FlashLab logo">
+  <svg viewBox="0 0 48 48" role="img" aria-hidden="true">
+    <path d="M24 4 40 13v22L24 44 8 35V13L24 4Z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <path d="m17 25 5-11 4 8 5-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="17" cy="25" r="2.4" fill="currentColor"/>
+    <circle cx="31" cy="18" r="2.4" fill="currentColor"/>
+  </svg>
+</span> Flash<span>Lab</span></a>
+    <nav class="nav-links">
+      <a href="#plans">Plans</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#payment">Payment</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="nav-btn" href="#calculator">Launch Demo</a>
+  </div>
+</header>
+
+<main id="home">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="pill">● DEMO LIQUIDITY PLATFORM</div>
+        <h1>Explore <em>Crypto Liquidity</em> Simulations.</h1>
+        <p>Professional crypto dashboard and transaction simulations for testing, education and interface demonstrations — with a clean testnet-style experience.</p>
+        <div class="hero-actions">
+          <a class="primary" href="#plans">Explore Plans →</a>
+          <a class="secondary" href="#calculator">Open Calculator</a>
+        </div>
+        <div class="stats">
+          <div><b>4</b><span>Simulation Networks</span></div>
+          <div><b>24/7</b><span>Demo Access</span></div>
+          <div><b>100%</b><span>Simulated UI</span></div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="card-top"><span>DEMO BALANCE</span><span class="live">● LIVE</span></div>
+        <div class="balance">200,000 <small>USDT DEMO</small></div>
+        <div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="wallet-row"><span>Simulation wallet</span><b>TNpg…GfNX</b></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="notice"><strong>DEMO ONLY:</strong> displayed balances are simulated values for testing and demonstration. They are not real USDT, blockchain deposits, or withdrawable cryptocurrency.</div>
+  </div>
+
+  <section class="section" id="plans">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">PLANS</span><h2>Simulation plans</h2><p>Choose a simulated liquidity scenario.</p></div>
+        <span class="demo-note">DEMO ONLY</span>
+      </div>
+      <div class="plans">
+        <article class="plan">
+          <div class="plan-label">Starter</div><div class="plan-amount">200,000 <small>USDT DEMO</small></div>
+          <div class="plan-price">Scenario amount<strong>50,000 USDT</strong></div><div class="plan-divider"></div>
+          <ul><li>TRC20 scenario</li><li>Demo balance</li><li>Transaction simulator</li><li>Dashboard access</li></ul>
+          <a href="#calculator">Select Plan</a>
+        </article>
+        <article class="plan">
+          <div class="plan-label">Professional</div><div class="plan-amount">500,000 <small>USDT DEMO</small></div>
+          <div class="plan-price">Scenario amount<strong>125,000 USDT</strong></div><div class="plan-divider"></div>
+          <ul><li>TRC20 scenario</li><li>Demo balance</li><li>Transaction simulator</li><li>Advanced dashboard</li></ul>
+          <a href="#calculator">Select Plan</a>
+        </article>
+        <article class="plan popular">
+          <div class="plan-tag">POPULAR</div>
+          <div class="plan-label">Business</div><div class="plan-amount">1,000,000 <small>USDT DEMO</small></div>
+          <div class="plan-price">Scenario amount<strong>250,000 USDT</strong></div><div class="plan-divider"></div>
+          <ul><li>Multi-network simulation</li><li>Demo balance</li><li>Transaction simulator</li><li>Priority dashboard</li></ul>
+          <a href="#calculator">Select Plan</a>
+        </article>
+        <article class="plan">
+          <div class="plan-label">Enterprise</div><div class="plan-amount">2,000,000 <small>USDT DEMO</small></div>
+          <div class="plan-price">Scenario amount<strong>500,000 USDT</strong></div><div class="plan-divider"></div>
+          <ul><li>Multi-network simulation</li><li>Large balance testing</li><li>Transaction simulator</li><li>Enterprise dashboard</li></ul>
+          <a href="#calculator">Select Plan</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="calculator">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">CALCULATOR</span><h2>Simulation calculator</h2><p>Estimate a simulated balance.</p></div>
+        <span class="demo-note">LOCAL UI</span>
+      </div>
+      <div class="panel" style="max-width:760px;margin:auto">
+        <div class="grid2">
+          <div><label style="display:block;font-size:10px;color:#829087;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;margin:0 0 8px">Simulation amount</label><input id="amount" type="number" value="50000" min="1" oninput="calculate()"></div>
+          <div><label style="display:block;font-size:10px;color:#829087;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;margin:0 0 8px">Simulation multiplier</label><select id="multiplier"><option value="4">4X</option><option value="5">5X</option><option value="10">10X</option></select></div>
+        </div>
+        <div class="result-box" style="text-align:center;margin-top:18px"><small style="display:block;color:#68746c">SIMULATED BALANCE</small><strong id="result" style="display:block;color:var(--green);font-size:30px;margin-top:3px">200,000 USDT DEMO</strong></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="networks">
+    <div class="container">
+      <span class="eyebrow">NETWORKS</span><h2>Supported networks.</h2>
+      <p class="section-intro">Network environments available in the simulator.</p>
+      <div class="network-grid">
+        <div class="network">₮<b>USDT TRC20</b><small>TRON NETWORK</small></div>
+        <div class="network">₮<b>USDT ERC20</b><small>ETHEREUM NETWORK</small></div>
+        <div class="network">₿<b>Bitcoin</b><small>BTC NETWORK</small></div>
+        <div class="network">◆<b>TRON</b><small>TRX NETWORK</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="payment">
+    <div class="container">
+      <div class="section-heading">
+        <div><span class="eyebrow">PAYMENT</span><h2>Payment address</h2><p>Network-specific address display and QR scanner.</p></div>
+        <span class="demo-note">VERIFY BEFORE USE</span>
+      </div>
+      <div class="payment">
+        <div class="tabs">
+          <button class="tab active" onclick="showWallet('USDT_TRC20',this)">USDT TRC20</button>
+          <button class="tab" onclick="showWallet('USDT_ERC20',this)">USDT ERC20</button>
+          <button class="tab" onclick="showWallet('BTC',this)">Bitcoin</button>
+          <button class="tab" onclick="showWallet('TRX',this)">TRX</button>
+        </div>
+        <div class="payment-card">
+          <div>
+            <div class="network-badge" id="networkName">USDT TRC20</div>
+            <h3>Payment Address</h3>
+            <p>Use only the selected network when making a legitimate service payment. Always verify the destination before sending.</p>
+            <label style="display:block;color:#829087;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;margin-bottom:8px">Wallet address</label>
+            <div class="address">
+              <input id="walletAddress" readonly value="TNpgpecFsTwHY3SBjWhGouEwa79C75GfNX">
+              <button onclick="copyWallet()">Copy</button>
+            </div>
+            <div class="warning">Verify the network and address before sending. Blockchain transactions may be irreversible.</div>
+          </div>
+          <div class="qr">
+            <div id="qrcode"></div>
+            <small>Scan the selected wallet address</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="container">
+      <span class="eyebrow">FEATURES</span><h2>Built for safe experimentation.</h2>
+      <div class="feature-grid">
+        <article class="feature"><span>01</span><h3>Multi-network UI</h3><p>Switch between supported network scenarios and inspect the corresponding address presentation.</p></article>
+        <article class="feature"><span>02</span><h3>Instant calculations</h3><p>Change the simulation amount or multiplier and see the demo balance update instantly.</p></article>
+        <article class="feature"><span>03</span><h3>QR + copy tools</h3><p>Preview a QR code and copy the displayed wallet address directly from the interface.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt" id="how">
+    <div class="container">
+      <span class="eyebrow">HOW IT WORKS</span><h2>Three simple steps.</h2>
+      <div class="steps">
+        <div class="step"><b>01</b><h3>Choose a plan</h3><p>Select the simulated balance and network scenario for your testing requirements.</p></div>
+        <div class="step"><b>02</b><h3>Configure</h3><p>Configure your simulated transaction, balance and network parameters.</p></div>
+        <div class="step"><b>03</b><h3>Test</h3><p>Use the demo environment to test dashboards, transaction flows and crypto interfaces.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container faq">
+      <span class="eyebrow">FAQ</span><h2>Questions, answered.</h2>
+      <details open><summary>Are the displayed USDT balances real?</summary><p>No. They are simulated balances intended for demonstration, UI testing and educational purposes.</p></details>
+      <details><summary>Can simulated USDT be withdrawn?</summary><p>No. Simulated balances have no monetary value and cannot be withdrawn, redeemed or transferred as real cryptocurrency.</p></details>
+      <details><summary>Does this create blockchain USDT?</summary><p>No. The simulator does not mint or alter blockchain USDT.</p></details>
+      <details><summary>What networks can be simulated?</summary><p>The interface supports scenarios for USDT TRC20, USDT ERC20, Bitcoin and TRON.</p></details>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <a class="brand" href="#home"><span class="flash-logo" aria-label="FlashLab logo">
+  <svg viewBox="0 0 48 48" role="img" aria-hidden="true">
+    <path d="M24 4 40 13v22L24 44 8 35V13L24 4Z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+    <path d="m17 25 5-11 4 8 5-4" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="17" cy="25" r="2.4" fill="currentColor"/>
+    <circle cx="31" cy="18" r="2.4" fill="currentColor"/>
+  </svg>
+</span> Flash<span>Lab</span></a>
+    <span>Demo &amp; Simulation Platform</span>
+    <span>© 2026 FlashLab · Simulated data only</span>
+  </div>
+</footer>
+
+<script>
+const wallets={
+ USDT_TRC20:"TNpgpecFsTwHY3SBjWhGouEwa79C75GfNX",
+ USDT_ERC20:"0x3081BF43Ed8F415A8628FABB8b26335d6F8eA213",
+ BTC:"bc1qwlr6ykhzmzzhys7pq5es9h8rk807tz305a5k65",
+ TRX:"TNpgpecFsTwHY3SBjWhGouEwa79C75GfNX"
+};
+let currentWallet=wallets.USDT_TRC20;
+
+function calculate(){
+ const amount=Number(document.getElementById("amount").value)||0;
+ const multiplier=Number(document.getElementById("multiplier").value);
+ document.getElementById("result").textContent=(amount*multiplier).toLocaleString("en-US")+" USDT DEMO";
+}
+document.getElementById("multiplier").addEventListener("change",calculate);
+
+function generateQR(address){
+ const box=document.getElementById("qrcode");
+ box.innerHTML="";
+ new QRCode(box,{text:address,width:170,height:170,correctLevel:QRCode.CorrectLevel.M});
+}
+function showWallet(network,button){
+ currentWallet=wallets[network];
+ document.getElementById("walletAddress").value=currentWallet;
+ const names={USDT_TRC20:"USDT TRC20",USDT_ERC20:"USDT ERC20",BTC:"Bitcoin",TRX:"TRX"};
+ document.getElementById("networkName").textContent=names[network];
+ document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+ button.classList.add("active");
+ generateQR(currentWallet);
+}
+async function copyWallet(){
+ try{
+   await navigator.clipboard.writeText(currentWallet);
+   const b=document.querySelector(".address button");
+   const old=b.textContent;b.textContent="Copied!";
+   setTimeout(()=>b.textContent=old,1400);
+ }catch(e){
+   const input=document.getElementById("walletAddress");
+   input.select();document.execCommand("copy");
+ }
+}
+calculate();
+generateQR(currentWallet);
+</script>
+</body>
+</html>
